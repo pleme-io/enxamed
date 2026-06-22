@@ -1,6 +1,6 @@
 [package]
 name = "enxamed"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.91.0"
 description = "enxamed — the ENXAME BitTorrent daemon/client: an async (tokio) shell that wires the sans-io enxame-engine to tracker announce, TCP peer connections, and disk. Part of the pleme-io ENXAME suite."
