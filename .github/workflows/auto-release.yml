@@ -1,0 +1,30 @@
+name: auto-release
+
+# Standard pleme-io AUTO-RELEASE shim — every push to main bumps the patch
+# version and ships the crate to crates.io via autobump (cargo-bump →
+# commit → tag → push → publish). All logic lives in pleme-io/actions/* +
+# the substrate reusable; operators only manage this file. See the org-level
+# ★★ AUTO-RELEASE directive. regenerate-cargo-nix is false because the ENXAME
+# crates use cross-repo path deps (crate2nix can't resolve ../sibling in a
+# standalone CI checkout); cargo publish strips the path and keeps the version,
+# so publishes still resolve once a dep is on crates.io (the pipeline defers +
+# retries for dependency order across the suite).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump-type:
+        description: "patch | minor | major"
+        required: false
+        default: patch
+
+jobs:
+  release:
+    uses: pleme-io/substrate/.github/workflows/cargo-auto-release.yml@main
+    with:
+      bump-type: ${{ inputs.bump-type || 'patch' }}
+      regenerate-cargo-nix: false
+      source-paths: "Cargo.toml Cargo.lock"
+    secrets: inherit

@@ -21,9 +21,15 @@ missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 
 [dependencies]
-bencode = { path = "../bencode", version = "0.1" }
+bencode = { package = "enxame-bencode", path = "../bencode", version = "0.1" }
 enxame-metainfo = { path = "../enxame-metainfo", version = "0.1" }
 enxame-peer = { path = "../enxame-peer", version = "0.1" }
 enxame-engine = { path = "../enxame-engine", version = "0.1" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "sync", "time", "fs"] }
 anyhow = "1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true

@@ -1,0 +1,38 @@
+name: ci
+
+# Test gate — the cargo-auto-release.yml reusable bumps + publishes but does
+# NOT run tests (publish is no-verify), so this workflow is the repo's
+# `cargo test` gate. clippy is informational per the fleet pattern; pedantic
+# warnings are advisory, not gates. Dependent crates green once their suite
+# deps land on crates.io (path-dep bootstrap order).
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: cargo test + clippy + fmt (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy (informational)
+        run: cargo clippy --all-targets
+        continue-on-error: true
+
+      - name: cargo test
+        run: cargo test --all-targets
