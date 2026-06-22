@@ -32,13 +32,16 @@ const PEER_ID_PREFIX: &[u8; 8] = b"-EX0100-";
 #[tokio::main]
 async fn main() -> Result<()> {
     let mut args = std::env::args().skip(1);
-    let torrent_path = args.next().context("usage: enxamed <file.torrent> [out-dir]")?;
+    let torrent_path = args
+        .next()
+        .context("usage: enxamed <file.torrent> [out-dir]")?;
     let out_dir = PathBuf::from(args.next().unwrap_or_else(|| ".".into()));
 
     let bytes = tokio::fs::read(&torrent_path)
         .await
         .with_context(|| format!("reading {torrent_path}"))?;
-    let metainfo = Metainfo::from_bytes(&bytes).map_err(|e| anyhow::anyhow!("parse torrent: {e}"))?;
+    let metainfo =
+        Metainfo::from_bytes(&bytes).map_err(|e| anyhow::anyhow!("parse torrent: {e}"))?;
     let Layout::SingleFile { length } = metainfo.info.layout else {
         bail!("MVP supports single-file torrents only; multi-file mapping is a follow-up");
     };
@@ -86,7 +89,9 @@ async fn main() -> Result<()> {
     // 3. The driver loop: events → engine → actions → I/O.
     let out_path = out_dir.join(&metainfo.info.name);
     let file = Arc::new(tokio::sync::Mutex::new(
-        prepare_output(&out_path, length).await.context("preparing output file")?,
+        prepare_output(&out_path, length)
+            .await
+            .context("preparing output file")?,
     ));
     let piece_length = metainfo.info.piece_length;
 
@@ -128,7 +133,9 @@ async fn main() -> Result<()> {
         // Persist the block (the engine verifies; we lay bytes down).
         if let Some((index, begin, data)) = pending_write {
             let offset = u64::from(index) * piece_length + u64::from(begin);
-            write_at(&file, offset, &data).await.context("writing block to disk")?;
+            write_at(&file, offset, &data)
+                .await
+                .context("writing block to disk")?;
         }
     }
 
@@ -162,15 +169,15 @@ async fn peer_task(
     events: mpsc::Sender<Event>,
     mut outbound: mpsc::Receiver<PeerMessage>,
 ) -> Result<()> {
-    let mut stream = tokio::time::timeout(
-        std::time::Duration::from_secs(10),
-        TcpStream::connect(addr),
-    )
-    .await
-    .context("connect timeout")??;
+    let mut stream =
+        tokio::time::timeout(std::time::Duration::from_secs(10), TcpStream::connect(addr))
+            .await
+            .context("connect timeout")??;
 
     // Handshake.
-    stream.write_all(&Handshake::new(info_hash.0, peer_id).encode()).await?;
+    stream
+        .write_all(&Handshake::new(info_hash.0, peer_id).encode())
+        .await?;
     let mut hs = [0u8; Handshake::LEN];
     stream.read_exact(&mut hs).await?;
     let remote = Handshake::parse(&hs).map_err(|e| anyhow::anyhow!("bad handshake: {e}"))?;

@@ -80,7 +80,9 @@ fn parse_peers(body: &[u8]) -> Result<Vec<SocketAddr>> {
     if let Some(reason) = value.get(b"failure reason").and_then(Bencode::as_str) {
         bail!("tracker failure: {reason}");
     }
-    let peers = value.get(b"peers").context("tracker response has no `peers`")?;
+    let peers = value
+        .get(b"peers")
+        .context("tracker response has no `peers`")?;
     match peers {
         // Compact form: 6 bytes per peer (4 IPv4 + 2 port, big-endian).
         Bencode::Bytes(b) => Ok(b
@@ -173,6 +175,9 @@ mod tests {
 
     #[test]
     fn splits_http_body() {
-        assert_eq!(split_http_body(b"HTTP/1.0 200 OK\r\n\r\nbody"), Some(b"body".as_slice()));
+        assert_eq!(
+            split_http_body(b"HTTP/1.0 200 OK\r\n\r\nbody"),
+            Some(b"body".as_slice())
+        );
     }
 }
