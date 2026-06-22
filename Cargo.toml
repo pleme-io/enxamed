@@ -1,0 +1,29 @@
+[package]
+name = "enxamed"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.91.0"
+description = "enxamed — the ENXAME BitTorrent daemon/client: an async (tokio) shell that wires the sans-io enxame-engine to tracker announce, TCP peer connections, and disk. Part of the pleme-io ENXAME suite."
+homepage = "https://github.com/pleme-io/enxamed"
+repository = "https://github.com/pleme-io/enxamed"
+readme = "README.md"
+license = "MIT"
+keywords = ["bittorrent", "torrent", "daemon", "client", "pleme-io"]
+publish = true
+
+[[bin]]
+name = "enxamed"
+path = "src/main.rs"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+
+[dependencies]
+bencode = { path = "../bencode", version = "0.1" }
+enxame-metainfo = { path = "../enxame-metainfo", version = "0.1" }
+enxame-peer = { path = "../enxame-peer", version = "0.1" }
+enxame-engine = { path = "../enxame-engine", version = "0.1" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "sync", "time", "fs"] }
+anyhow = "1"
